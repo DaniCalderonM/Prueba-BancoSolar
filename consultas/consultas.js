@@ -69,7 +69,7 @@ const verUsuarios = async () => {
 // Actualizar un usuario
 const editarUsuario = async (id, nombre, balance) => {
     try {
-        //Validar que ingresen todos los campos (si se ejecuta en thunder o en postman)
+        //Validar que ingresen todos los campos por thunder o postman
         if (!id || !nombre || !balance) {
             mensaje = "Debe ingresar todos los campos: id, nombre y balance";
             console.log(mensaje);
@@ -86,7 +86,7 @@ const editarUsuario = async (id, nombre, balance) => {
             console.log(mensaje);
             return mensaje;
         } else {
-            console.log(`Usuario con nombre: ${nombre} actualizado correctamente.`);
+            console.log(`Usuario con id: ${id} actualizado correctamente.`);
             return resultado.rows[0];
         }
     } catch (error) {
@@ -97,7 +97,7 @@ const editarUsuario = async (id, nombre, balance) => {
 //Eliminar un usuario
 const eliminarUsuario = async (id) => {
     try {
-        //Validar que ingresen el campo id (si se ejecuta en thunder o en postman)
+        //Validar que ingresen el campo id por thunder o postman
         if (!id) {
             mensaje = "Debe ingresar el campo id";
             console.log(mensaje);
@@ -126,59 +126,69 @@ const eliminarUsuario = async (id) => {
 //Agregar una nueva transferencia
 const nuevaTransferencia = async (emisor, receptor, monto) => {
     try {
+        //Validar que ingresen el campo emisor, receptor y monto por thunder o postman
+        if (!emisor || !receptor || !monto) {
+            mensaje = "Debe ingresar todos los campos: emisor, receptor y monto";
+            console.log(mensaje);
+            return mensaje;
+        }
         // Validar que el emisor y el receptor no sean la misma persona
         if (emisor === receptor) {
-            //return { error: "El emisor y el receptor no pueden ser la misma persona"}
             return "El emisor y el receptor no pueden ser la misma persona"
         }
-
-        await pool.query("BEGIN");
-
-        // Paso 1: Actualizar saldo del emisor
-        const descontar = {
-            text: `UPDATE ${tabla1} SET balance = balance - $1 WHERE id = $2 RETURNING *`,
-            values: [monto, emisor]
-        }
-        const descuento = await pool.query(descontar);
-
-        if (descuento.rowCount == 1) {
-            console.log("Descuento realizado con éxito: ", descuento.rows[0]);
+        // Validar que el monto no sea negativo en thunder o postman
+        if (monto < 0) {
+            return "El monto a transferir no puede ser menor a 0"
         } else {
-            console.log("No se pudo realizar el descuento, el usuario no existe");
-            await pool.query("ROLLBACK");
-            return "Transacción Incompleta, se aplicó ROLLBACK";
-        }
 
-        // Paso 2: Actualizar saldo del receptor
-        const acreditar = {
-            text: `UPDATE ${tabla1} SET balance = balance + $1 WHERE id = $2 RETURNING *`,
-            values: [monto, receptor]
-        }
-        const acreditacion = await pool.query(acreditar);
+            await pool.query("BEGIN");
 
-        if (acreditacion.rowCount == 1) {
-            console.log("Acreditación realizada con éxito: ", acreditacion.rows[0]);
-            await pool.query("COMMIT");
-        } else {
-            console.log("No se pudo realizar la acreditación, el usuario no existe");
-            await pool.query("ROLLBACK");
-            return "Transacción Incompleta, se aplicó ROLLBACK";
-        }
+            // Paso 1: Actualizar y descontar saldo del emisor
+            const descontar = {
+                text: `UPDATE ${tabla1} SET balance = balance - $1 WHERE id = $2 RETURNING *`,
+                values: [monto, emisor]
+            }
+            const descuento = await pool.query(descontar);
 
-        // Paso 3: Insertar en la tabla transferencias
-        const insertar = {
-            text: `INSERT INTO ${tabla2} (emisor, receptor, monto, fecha) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *`,
-            values: [emisor, receptor, monto]
-        }
-        const insertacion = await pool.query(insertar);
+            if (descuento.rowCount == 1) {
+                console.log("Descuento realizado con éxito: ", descuento.rows[0]);
+            } else {
+                console.log("No se pudo realizar el descuento, el usuario no existe");
+                await pool.query("ROLLBACK");
+                return "Transacción Incompleta, se aplicó ROLLBACK";
+            }
 
-        if (insertacion.rowCount == 1) {
-            console.log("Registro de transferencia exitoso: ", insertacion.rows[0]);
-            return insertacion.rows[0];
-        } else {
-            console.log("No se pudo realizar el registro de transferencia");
-            await pool.query("ROLLBACK");
-            return "Transacción Incompleta, se aplicó ROLLBACK";
+            // Paso 2: Actualizar y aumentar saldo del receptor
+            const acreditar = {
+                text: `UPDATE ${tabla1} SET balance = balance + $1 WHERE id = $2 RETURNING *`,
+                values: [monto, receptor]
+            }
+            const acreditacion = await pool.query(acreditar);
+
+            if (acreditacion.rowCount == 1) {
+                console.log("Acreditación realizada con éxito: ", acreditacion.rows[0]);
+                await pool.query("COMMIT");
+            } else {
+                console.log("No se pudo realizar la acreditación, el usuario no existe");
+                await pool.query("ROLLBACK");
+                return "Transacción Incompleta, se aplicó ROLLBACK";
+            }
+
+            // Paso 3: Insertar registro en la tabla transferencias
+            const insertar = {
+                text: `INSERT INTO ${tabla2} (emisor, receptor, monto, fecha) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *`,
+                values: [emisor, receptor, monto]
+            }
+            const insertacion = await pool.query(insertar);
+
+            if (insertacion.rowCount == 1) {
+                console.log("Registro de transferencia exitoso: ", insertacion.rows[0]);
+                return insertacion.rows[0];
+            } else {
+                console.log("No se pudo realizar el registro de transferencia");
+                await pool.query("ROLLBACK");
+                return "Transacción Incompleta, se aplicó ROLLBACK";
+            }
         }
     } catch (e) {
         await pool.query("ROLLBACK");

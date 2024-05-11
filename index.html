@@ -218,6 +218,9 @@
     if (!monto || !emisor || !receptor) {
       alert("Debe seleccionar un emisor, receptor y monto a transferir");
       return false;
+    } else if (monto <= 0){
+      alert("El monto a transferir no puede ser menor o igual a 0");
+      return false;
     }
     try {
       // const response = await fetch("http://localhost:3000/transferencia", {
@@ -231,7 +234,7 @@
       //     monto,
       //   }),
       // });
-
+      
       const response = await axios.post("http://localhost:3000/transferencia", {
         emisor,
         receptor,
