@@ -233,12 +233,12 @@
       // });
 
       const response = await axios.post("http://localhost:3000/transferencia", {
-          emisor,
-          receptor,
-          monto,
-        })
-      console.log("valor de response: ", response)
-      alert("Resultado de la operacion: " + response.data);
+        emisor,
+        receptor,
+        monto,
+      })
+      console.log("valor de response en transferencias: ", response)
+      alert("Resultado de la operacion: " + response.data.mensaje);
       //const data = await response.json();
       location.reload();
     } catch (e) {
@@ -290,7 +290,7 @@
 
 
     data.forEach((t) => {
-      console.log("tipo de data: ", t)
+      //console.log("tipo de data: ", t)
       $(".transferencias").append(`
        <tr>
          <td> ${formatDate(t[4])} </td>

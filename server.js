@@ -38,8 +38,8 @@ app.get('/usuarios', async (req, res) => {
         } else {
             res.json({
                 status: "Error",
-                data: respuesta,
-                mensaje: "Proceso de conexion incorrecto"
+                //data: respuesta,
+                mensaje: respuesta
             })
         }
     } catch (error) {
@@ -54,12 +54,12 @@ app.get('/usuarios', async (req, res) => {
 app.put('/usuario', async (req, res) => {
     try {
         const { id } = req.query;
-        console.log("id: ", req.query);
+        //console.log("id: ", req.query);
         const { name, balance } = req.body;
-        console.log("name: ", name);
-        console.log("balance: ", balance);
+        // console.log("name: ", name);
+        // console.log("balance: ", balance);
         const respuesta = await editarUsuario(id, name, balance);
-        console.log("respuesta:", respuesta)
+        //console.log("respuesta:", respuesta)
         res.send(respuesta)
     } catch (error) {
         res.send(error)
@@ -83,13 +83,27 @@ app.delete('/usuario', async (req, res) => {
 app.post('/transferencia', async (req, res) => {
     try {
         const { emisor, receptor, monto } = req.body;
-        console.log("emisor, receptor, monto: ", emisor, receptor, monto)
+        //console.log("emisor, receptor, monto: ", emisor, receptor, monto)
         const respuesta = await nuevaTransferencia(emisor, receptor, monto);
-        console.log("valor de respuesta en transferencia: ", respuesta)
-        res.send(respuesta)
+        if(typeof respuesta !== "string"){
+            res.json({
+                status: "Ok",
+                data: respuesta,
+                mensaje: "Tranferencia exitosa"
+            })
+        } else {
+            res.json({
+                status: "Error",
+                //data: respuesta,
+                mensaje: respuesta
+            })
+        }
+        //console.log("valor de respuesta en transferencia: ", respuesta)
     } catch (e) {
-        console.log("valor de error: ", e)
-        res.send(e)
+        res.json({
+            status: "Error",
+            mensaje: error
+        })
     }
 });
 

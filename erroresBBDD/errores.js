@@ -13,8 +13,12 @@ const manejoErrores = (error, pool, tabla) => {
         case '22P02':
             mensaje = "Error, la sintaxis de entrada no es válida para tipo integer";
             break;
+            case 'ERR_SOCKET_BAD_PORT':
+                mensaje = "Error, El valor del puerto debe ser >=0 y < 65536";
+                break;
             case '23514':
-            mensaje = "El nuevo registro para la relación [" + error.table + "] viola la restricción «check»";
+            //mensaje = "El nuevo registro para la relación [" + error.table + "] viola la restricción «check»";
+            mensaje = "El usuario no puede transferir más dinero del que tiene (violación de la restricción «check»)";
             break;
         case '3D000':
             mensaje = "Error, la Base de Datos [" + pool.options.database + "] no existe";
