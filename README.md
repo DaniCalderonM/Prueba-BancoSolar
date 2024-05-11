@@ -52,6 +52,6 @@ Punto)
 
 ## Autor
 - Danicsa Calderón - [GitHub](https://github.com/DaniCalderonM)
-- 
+  
 ![8e49375f12297ac54aca4d7d82a6935f](https://github.com/DaniCalderonM/Prueba-BancoSolar/assets/128839529/3a97a8a2-cb77-423b-b02b-8a189f8ec545)
 
