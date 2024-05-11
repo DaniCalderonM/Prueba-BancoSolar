@@ -7,7 +7,7 @@ let mensaje;
 // Agregar un nuevo usuario
 const nuevoUsuario = async (nombre, balance) => {
     try {
-        // Validar que ingresen todos los campos, tanto en el formulario como por thunder o postman
+        // Validar que ingresen todos los campos por thunder o postman
         if (!nombre || !balance) {
             mensaje = "Debe ingresar todos los campos: nombre y balance";
             console.log(mensaje);
@@ -49,7 +49,7 @@ const nuevoUsuario = async (nombre, balance) => {
 const verUsuarios = async () => {
     try {
         const consulta = {
-            text: `SELECT nombre, balance FROM ${tabla1}`
+            text: `SELECT * FROM ${tabla1}`
         };
         const resultado = await pool.query(consulta);
 
@@ -126,6 +126,12 @@ const eliminarUsuario = async (id) => {
 //Agregar una nueva transferencia
 const nuevaTransferencia = async (emisor, receptor, monto) => {
     try {
+        // Validar que el emisor y el receptor no sean la misma persona
+        if (emisor === receptor) {
+            //return { error: "El emisor y el receptor no pueden ser la misma persona"}
+            return "El emisor y el receptor no pueden ser la misma persona"
+        }
+
         await pool.query("BEGIN");
 
         // Paso 1: Actualizar saldo del emisor
@@ -162,7 +168,7 @@ const nuevaTransferencia = async (emisor, receptor, monto) => {
         // Paso 3: Insertar en la tabla transferencias
         const insertar = {
             text: `INSERT INTO ${tabla2} (emisor, receptor, monto, fecha) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *`,
-            values: [emisor, receptor, monto, fecha]
+            values: [emisor, receptor, monto]
         }
         const insertacion = await pool.query(insertar);
 
@@ -176,8 +182,8 @@ const nuevaTransferencia = async (emisor, receptor, monto) => {
         }
     } catch (e) {
         await pool.query("ROLLBACK");
-        console.log("Error de conexión o instrucción, Transacción abortada");
-        return "Error en transacción, aplicado ROLLBACK: " + e;
+        console.log("Error de conexión o instrucción, Transacción abortada: ", e.message);
+        return manejoErrores(e, pool, tabla2);
     }
 };
 
@@ -186,7 +192,8 @@ const nuevaTransferencia = async (emisor, receptor, monto) => {
 const verTransferencias = async () => {
     try {
         const consulta = {
-            text: `SELECT t.fecha, t.monto, e.nombre, r.nombre FROM ${tabla2} t
+            rowMode: "array",
+            text: `SELECT t.id, t.monto, e.nombre, r.nombre, t.fecha FROM ${tabla2} t
             INNER JOIN ${tabla1} e ON e.id = t.emisor INNER JOIN ${tabla1} r ON
             r.id = t.receptor`
         };

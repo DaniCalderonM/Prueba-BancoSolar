@@ -28,9 +28,25 @@ app.post('/usuario', async (req, res) => {
 app.get('/usuarios', async (req, res) => {
     try {
         const respuesta = await verUsuarios();
-        res.json(respuesta)
+        console.log("valor de respuesta: ", respuesta)
+        if(typeof respuesta !== "string"){
+            res.json({
+                status: "Ok",
+                data: respuesta,
+                mensaje: "Proceso de conexion correcto"
+            })
+        } else {
+            res.json({
+                status: "Error",
+                data: respuesta,
+                mensaje: "Proceso de conexion incorrecto"
+            })
+        }
     } catch (error) {
-        res.json(error)
+        res.json({
+            status: "Error",
+            mensaje: error
+        })
     }
 });
 
@@ -38,7 +54,7 @@ app.get('/usuarios', async (req, res) => {
 app.put('/usuario', async (req, res) => {
     try {
         const { id } = req.query;
-        console.log("id: ", id);
+        console.log("id: ", req.query);
         const { name, balance } = req.body;
         console.log("name: ", name);
         console.log("balance: ", balance);
@@ -67,27 +83,27 @@ app.delete('/usuario', async (req, res) => {
 app.post('/transferencia', async (req, res) => {
     try {
         const { emisor, receptor, monto } = req.body;
-        console.log("emisor, receptor, monto", emisor, receptor, monto)
+        console.log("emisor, receptor, monto: ", emisor, receptor, monto)
         const respuesta = await nuevaTransferencia(emisor, receptor, monto);
+        console.log("valor de respuesta en transferencia: ", respuesta)
         res.send(respuesta)
-    } catch (error) {
-        res.send(error)
+    } catch (e) {
+        console.log("valor de error: ", e)
+        res.send(e)
     }
 });
-
 
 //6. Crer una ruta GET /transferencias: Devuelve todas las transferencias almacenadas en la base de
 //datos en formato de arreglo.
 app.get('/transferencias', async (req, res) => {
     try {
         const respuesta = await verTransferencias();
+        console.log("transferencias: ", respuesta);
         res.json(respuesta)
     } catch (error) {
         res.json(error)
     }
 });
-
-
 
 // Ruta generica para enviar mensaje cuando la ruta ingresada no existe
 app.get("*", (req, res) => {

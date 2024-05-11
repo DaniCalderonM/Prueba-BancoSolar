@@ -13,6 +13,9 @@ const manejoErrores = (error, pool, tabla) => {
         case '22P02':
             mensaje = "Error, la sintaxis de entrada no es válida para tipo integer";
             break;
+            case '23514':
+            mensaje = "El nuevo registro para la relación [" + error.table + "] viola la restricción «check»";
+            break;
         case '3D000':
             mensaje = "Error, la Base de Datos [" + pool.options.database + "] no existe";
             break;
