@@ -8,8 +8,3 @@ balance FLOAT CHECK (balance >= 0));
 CREATE TABLE transferencias (id SERIAL PRIMARY KEY, emisor INT, receptor
 INT, monto FLOAT, fecha TIMESTAMP, FOREIGN KEY (emisor) REFERENCES
 usuarios(id) ON DELETE CASCADE, FOREIGN KEY (receptor) REFERENCES usuarios(id) ON DELETE CASCADE);
-
--- Consultas
-SELECT t.fecha, t.monto, e.nombre, r.nombre FROM transferencias t
-            INNER JOIN usuarios e ON e.id = t.emisor INNER JOIN usuarios r ON
-            r.id = t.receptor;
