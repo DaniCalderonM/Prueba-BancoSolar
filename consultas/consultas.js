@@ -203,7 +203,7 @@ const verTransferencias = async () => {
     try {
         const consulta = {
             rowMode: "array",
-            text: `SELECT t.id, t.monto, e.nombre, r.nombre, t.fecha FROM ${tabla2} t
+            text: `SELECT t.id, e.nombre, r.nombre, t.monto  FROM ${tabla2} t
             INNER JOIN ${tabla1} e ON e.id = t.emisor INNER JOIN ${tabla1} r ON
             r.id = t.receptor`
         };
