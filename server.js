@@ -1,16 +1,17 @@
 import express from "express";
 const app = express();
 import { nuevoUsuario, verUsuarios, editarUsuario, eliminarUsuario, nuevaTransferencia, verTransferencias } from "./consultas/consultas.js";
-
+import cors from "cors";
 const PORT = 3000;
 
 // Middleware para enviar respuestas json
 app.use(express.json());
+app.use(cors());
 
 // Ruta principal que envia un archivo HTML
-app.get("/", (req, res) => {
-    res.sendFile("index.html", { root: "./" });
-})
+// app.get("/", (req, res) => {
+//     res.sendFile("index.html", { root: "./" });
+// })
 
 
 // 1. Crear una ruta POST /usuario: Recibe los datos de un nuevo usuario y los almacena en PostgreSQL.
@@ -29,7 +30,7 @@ app.get('/usuarios', async (req, res) => {
     try {
         const respuesta = await verUsuarios();
         console.log("valor de respuesta: ", respuesta)
-        if(typeof respuesta !== "string"){
+        if (typeof respuesta !== "string") {
             res.json({
                 status: "Ok",
                 data: respuesta,
@@ -85,7 +86,7 @@ app.post('/transferencia', async (req, res) => {
         const { emisor, receptor, monto } = req.body;
         //console.log("emisor, receptor, monto: ", emisor, receptor, monto)
         const respuesta = await nuevaTransferencia(emisor, receptor, monto);
-        if(typeof respuesta !== "string"){
+        if (typeof respuesta !== "string") {
             res.json({
                 status: "Ok",
                 data: respuesta,
