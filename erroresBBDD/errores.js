@@ -32,6 +32,9 @@ const manejoErrores = (error, pool, tabla) => {
         case '42703':
             mensaje = "Error, no existe la columna consultada: " + error.hint;
             break;
+            case '23503':
+            mensaje = "Error: " + error.message;
+            break;
         case 'ENOTFOUND':
             mensaje = "Error en el valor usado como localhost: " + pool.options.host;
             break;
@@ -39,7 +42,7 @@ const manejoErrores = (error, pool, tabla) => {
             mensaje = "Error en el puerto de conexión a BD, usando: " + pool.options.port;
             break;
         default:
-            mensaje = "Default: " + error;
+            mensaje = "Default: " + error.code + " " + error.message;
             break;
     }
     console.log(mensaje);
