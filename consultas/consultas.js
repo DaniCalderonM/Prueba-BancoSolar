@@ -197,7 +197,6 @@ const nuevaTransferencia = async (emisor, receptor, monto) => {
     }
 };
 
-
 // Mostrar todas las transferencias
 const verTransferencias = async () => {
     try {
